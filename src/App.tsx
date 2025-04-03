@@ -8,11 +8,8 @@ import Policies from './pages/Policies';
 import Claims from './pages/Claims';
 import Payments from './pages/Payments';
 import NewPayment from './pages/NewPayment';
-import Settings from './pages/Settings';
 import Support from './pages/Support';
-import Sidebar from './components/Sidebar';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import AppBar from './components/AppBar';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -35,19 +32,16 @@ function AppContent() {
           element={
             <PrivateRoute>
               <Box sx={{ display: 'flex', width: '100%' }}>
-                <Sidebar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
                 <Box
                   component="main"
                   sx={{
                     flexGrow: 1,
                     p: { xs: 2, sm: 3, md: 4 },
-                    width: { sm: `calc(100% - 240px)` },
-                    ml: { sm: '240px' },
+                    width: '100%',
                     background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
                     minHeight: '100vh',
                   }}
                 >
-                  <AppBar handleDrawerToggle={handleDrawerToggle} />
                   <Box sx={{ mt: 8 }}>
                     <Routes>
                       <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -56,7 +50,6 @@ function AppContent() {
                       <Route path="/claims" element={<Claims />} />
                       <Route path="/payments" element={<Payments />} />
                       <Route path="/payments/new" element={<NewPayment />} />
-                      <Route path="/settings" element={<Settings />} />
                       <Route path="/support" element={<Support />} />
                     </Routes>
                   </Box>
