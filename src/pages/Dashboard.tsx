@@ -3,6 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { mockPolicies, mockClaims, mockPayments, Policy, Claim, Payment } from '../data/mockData';
 import { useNavigate } from 'react-router-dom';
 import QuickLinks from '../components/QuickLinks';
+import { 
+  ShieldCheckIcon, 
+  DocumentCheckIcon, 
+  CurrencyDollarIcon,
+  ChartBarIcon
+} from '@heroicons/react/24/outline';
 
 const INSURANCE_ICONS: { [key: string]: string } = {
   'Auto Insurance': '🚗',
@@ -19,7 +25,7 @@ export default function Dashboard() {
   if (!user) {
     return (
       <Box sx={{ p: 3 }}>
-        <Typography>Please log in to view your dashboard</Typography>
+        <Typography>Please log in to view the dashboard</Typography>
       </Box>
     );
   }
@@ -36,10 +42,13 @@ export default function Dashboard() {
     userPolicies.some(policy => policy.id === payment.policyId)
   );
 
-  const pendingClaims = userClaims.filter((claim: Claim) => claim.status === 'Pending');
-  const nextPayment = userPayments.find(payment => payment.status === 'Pending');
-  const totalCoverage = userPolicies.reduce((sum, policy) => sum + policy.coverage, 0);
-  const monthlyPremium = userPolicies.reduce((sum, policy) => sum + policy.premium, 0);
+  const pendingClaims = userClaims.filter(claim => claim.status === 'pending').length;
+  const nextPayment = userPayments
+    .filter(payment => new Date(payment.date) > new Date())
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+
+  const totalCoverage = userPolicies.reduce((sum, policy) => sum + (policy.coverage || 0), 0);
+  const totalPremium = userPolicies.reduce((sum, policy) => sum + (policy.premium || 0), 0);
 
   const recentActivity = [
     ...userPayments.map(payment => ({
@@ -70,6 +79,37 @@ export default function Dashboard() {
         return 'default';
     }
   };
+
+  const stats = [
+    {
+      title: 'Active Policies',
+      value: userPolicies.length || 0,
+      icon: ShieldCheckIcon,
+      color: theme.palette.primary.main,
+      trend: userPolicies.length > 0 ? `${userPolicies.length} active` : 'No active policies'
+    },
+    {
+      title: 'Pending Claims',
+      value: pendingClaims || 0,
+      icon: DocumentCheckIcon,
+      color: theme.palette.warning.main,
+      trend: pendingClaims > 0 ? 'Needs attention' : 'All clear'
+    },
+    {
+      title: 'Next Payment',
+      value: nextPayment ? `$${nextPayment.amount.toLocaleString()}` : '$0',
+      icon: CurrencyDollarIcon,
+      color: theme.palette.success.main,
+      trend: nextPayment ? `Due ${new Date(nextPayment.date).toLocaleDateString()}` : 'No upcoming payments'
+    },
+    {
+      title: 'Total Coverage',
+      value: `$${totalCoverage.toLocaleString()}`,
+      icon: ChartBarIcon,
+      color: theme.palette.info.main,
+      trend: `$${totalPremium.toLocaleString()} monthly premium`
+    }
+  ];
 
   return (
     <Container maxWidth="xl">
@@ -121,42 +161,84 @@ export default function Dashboard() {
         </Box>
 
         {/* Overview Cards */}
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { 
-            xs: '1fr', 
-            sm: 'repeat(2, 1fr)', 
-            md: 'repeat(4, 1fr)' 
-          }, 
-          gap: 3 
-        }}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">Active Policies</Typography>
-            <Typography variant="h4">{userPolicies.length}</Typography>
-          </Paper>
-
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">Pending Claims</Typography>
-            <Typography variant="h4">{pendingClaims.length}</Typography>
-          </Paper>
-
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">Next Payment</Typography>
-            <Typography variant="h4">
-              ${nextPayment ? nextPayment.amount.toFixed(2) : '0.00'}
-            </Typography>
-          </Paper>
-
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">Total Coverage</Typography>
-            <Typography variant="h4">${totalCoverage.toLocaleString()}</Typography>
-          </Paper>
-
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">Monthly Premium</Typography>
-            <Typography variant="h4">${monthlyPremium.toLocaleString()}</Typography>
-          </Paper>
-        </Box>
+        <Grid container spacing={4} sx={{ mb: 8 }}>
+          {stats.map((stat, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 4,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  background: `linear-gradient(135deg, ${stat.color}10, ${stat.color}05)`,
+                  border: `1px solid ${stat.color}20`,
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: `0 8px 24px ${stat.color}20`,
+                    background: `linear-gradient(135deg, ${stat.color}15, ${stat.color}10)`
+                  }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: `${stat.color}15`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mr: 2.5,
+                      boxShadow: `0 4px 12px ${stat.color}20`
+                    }}
+                  >
+                    <stat.icon style={{ width: 28, height: 28, color: stat.color }} />
+                  </Box>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      color: 'text.secondary',
+                      fontWeight: 500,
+                      fontSize: '1.1rem'
+                    }}
+                  >
+                    {stat.title}
+                  </Typography>
+                </Box>
+                
+                <Typography 
+                  variant="h4" 
+                  sx={{ 
+                    mb: 2,
+                    fontWeight: 700,
+                    background: `linear-gradient(45deg, ${stat.color}, ${theme.palette.mode === 'dark' ? stat.color + '80' : stat.color + '60'})`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontSize: { xs: '2rem', sm: '2.25rem' }
+                  }}
+                >
+                  {stat.value}
+                </Typography>
+                
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    mt: 'auto',
+                    fontSize: '0.95rem',
+                    opacity: 0.8,
+                    pt: 1
+                  }}
+                >
+                  {stat.trend}
+                </Typography>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
 
         {/* Recent Activity */}
         <Paper 
@@ -164,6 +246,7 @@ export default function Dashboard() {
           sx={{ 
             p: 4, 
             mb: 6, 
+            mt: 4,
             borderRadius: 4,
             border: '1px solid',
             borderColor: theme.palette.mode === 'light' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
