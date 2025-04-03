@@ -1,6 +1,6 @@
-import { Box, Typography, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, Avatar, Container, useTheme } from '@mui/material';
+import { Box, Typography, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, Avatar, Container, useTheme, Grid } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
-import { policies, claims, payments } from '../data/mockData';
+import { mockPolicies, mockClaims, mockPayments, Policy, Claim, Payment } from '../data/mockData';
 import { useNavigate } from 'react-router-dom';
 import QuickLinks from '../components/QuickLinks';
 
@@ -16,22 +16,33 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const userPolicies = policies.filter(policy => 
-    user?.policyNumbers.includes(policy.id)
+  if (!user) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography>Please log in to view your dashboard</Typography>
+      </Box>
+    );
+  }
+
+  const userPolicies = mockPolicies.filter(policy => 
+    user.policies.includes(policy.id)
   );
 
-  const userClaims = claims.filter(claim =>
+  const userClaims = mockClaims.filter(claim => 
     userPolicies.some(policy => policy.id === claim.policyId)
   );
 
-  const pendingClaims = userClaims.filter(claim => claim.status.toLowerCase() === 'pending');
-  const nextPayment = userPolicies.reduce((min, policy) => {
-    const monthlyPayment = policy.premium / 12;
-    return monthlyPayment < min ? monthlyPayment : min;
-  }, Infinity);
+  const userPayments = mockPayments.filter(payment => 
+    userPolicies.some(policy => policy.id === payment.policyId)
+  );
+
+  const pendingClaims = userClaims.filter((claim: Claim) => claim.status === 'Pending');
+  const nextPayment = userPayments.find(payment => payment.status === 'Pending');
+  const totalCoverage = userPolicies.reduce((sum, policy) => sum + policy.coverage, 0);
+  const monthlyPremium = userPolicies.reduce((sum, policy) => sum + policy.premium, 0);
 
   const recentActivity = [
-    ...payments.map(payment => ({
+    ...userPayments.map(payment => ({
       date: new Date(payment.date),
       activity: `Premium payment for ${userPolicies.find(p => p.id === payment.policyId)?.type}`,
       status: payment.status,
@@ -112,131 +123,38 @@ export default function Dashboard() {
         {/* Overview Cards */}
         <Box sx={{ 
           display: 'grid', 
-          gridTemplateColumns: {
-            xs: '1fr',
-            sm: 'repeat(2, 1fr)',
-            lg: 'repeat(4, 1fr)'
-          },
-          gap: 3, 
-          mb: 6
+          gridTemplateColumns: { 
+            xs: '1fr', 
+            sm: 'repeat(2, 1fr)', 
+            md: 'repeat(4, 1fr)' 
+          }, 
+          gap: 3 
         }}>
-          <Paper 
-            elevation={0}
-            sx={{ 
-              p: 3, 
-              background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)', 
-              color: 'white',
-              borderRadius: 4,
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2), transparent 70%)',
-                pointerEvents: 'none'
-              }
-            }}
-          >
-            <Typography color="rgba(255,255,255,0.9)" gutterBottom fontSize="1.1rem">Active Policies</Typography>
-            <Typography variant="h3" sx={{ mb: 2, fontWeight: 700 }}>{userPolicies.length}</Typography>
-            <Typography sx={{ color: 'rgba(255,255,255,0.9)' }}>
-              Across {new Set(userPolicies.map(p => p.type)).size} categories
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6">Active Policies</Typography>
+            <Typography variant="h4">{userPolicies.length}</Typography>
+          </Paper>
+
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6">Pending Claims</Typography>
+            <Typography variant="h4">{pendingClaims.length}</Typography>
+          </Paper>
+
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6">Next Payment</Typography>
+            <Typography variant="h4">
+              ${nextPayment ? nextPayment.amount.toFixed(2) : '0.00'}
             </Typography>
           </Paper>
 
-          <Paper 
-            elevation={0}
-            sx={{ 
-              p: 3, 
-              background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', 
-              color: 'white',
-              borderRadius: 4,
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2), transparent 70%)',
-                pointerEvents: 'none'
-              }
-            }}
-          >
-            <Typography color="rgba(255,255,255,0.9)" gutterBottom fontSize="1.1rem">Pending Claims</Typography>
-            <Typography variant="h3" sx={{ mb: 2, fontWeight: 700 }}>{pendingClaims.length}</Typography>
-            <Typography sx={{ color: 'rgba(255,255,255,0.9)' }}>
-              Total amount: ${pendingClaims.reduce((sum, claim) => sum + claim.amount, 0).toLocaleString()}
-            </Typography>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6">Total Coverage</Typography>
+            <Typography variant="h4">${totalCoverage.toLocaleString()}</Typography>
           </Paper>
 
-          <Paper 
-            elevation={0}
-            sx={{ 
-              p: 3, 
-              background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', 
-              color: 'white',
-              borderRadius: 4,
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2), transparent 70%)',
-                pointerEvents: 'none'
-              }
-            }}
-          >
-            <Typography color="rgba(255,255,255,0.9)" gutterBottom fontSize="1.1rem">Next Payment</Typography>
-            <Typography variant="h3" sx={{ mb: 2, fontWeight: 700 }}>${nextPayment.toLocaleString()}</Typography>
-            <Typography sx={{ color: 'rgba(255,255,255,0.9)' }}>
-              Due in {Math.ceil((new Date('2024-04-01').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
-            </Typography>
-          </Paper>
-
-          <Paper 
-            elevation={0}
-            onClick={() => navigate('/support')}
-            sx={{ 
-              p: 3, 
-              background: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)', 
-              color: 'white',
-              borderRadius: 4,
-              cursor: 'pointer',
-              position: 'relative',
-              overflow: 'hidden',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 12px 20px -10px rgba(156,39,176,0.4)'
-              },
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2), transparent 70%)',
-                pointerEvents: 'none'
-              }
-            }}
-          >
-            <Typography color="rgba(255,255,255,0.9)" gutterBottom fontSize="1.1rem">Need Help?</Typography>
-            <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>Contact Support</Typography>
-            <Typography sx={{ color: 'rgba(255,255,255,0.9)' }}>
-              24/7 customer service
-            </Typography>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6">Monthly Premium</Typography>
+            <Typography variant="h4">${monthlyPremium.toLocaleString()}</Typography>
           </Paper>
         </Box>
 

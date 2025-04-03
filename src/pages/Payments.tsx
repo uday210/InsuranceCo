@@ -1,17 +1,25 @@
 import { Box, Typography, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
-import { payments, policies } from '../data/mockData';
+import { mockPayments, mockPolicies } from '../data/mockData';
 import { useNavigate } from 'react-router-dom';
 
 export default function Payments() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const userPolicies = policies.filter(policy => 
-    user?.policyNumbers.includes(policy.id)
+  if (!user) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography>Please log in to view your payments</Typography>
+      </Box>
+    );
+  }
+
+  const userPolicies = mockPolicies.filter(policy => 
+    user.policies.includes(policy.id)
   );
 
-  const userPayments = payments.filter(payment =>
+  const userPayments = mockPayments.filter(payment => 
     userPolicies.some(policy => policy.id === payment.policyId)
   );
 
@@ -47,37 +55,28 @@ export default function Payments() {
             <TableHead>
               <TableRow>
                 <TableCell>Payment ID</TableCell>
-                <TableCell>Policy</TableCell>
                 <TableCell>Amount</TableCell>
-                <TableCell>Date</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>Actions</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Payment Method</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {userPayments.map((payment) => {
-                const policy = userPolicies.find(p => p.id === payment.policyId);
-                return (
-                  <TableRow key={payment.id}>
-                    <TableCell>{payment.id}</TableCell>
-                    <TableCell>{policy?.type} ({payment.policyId})</TableCell>
-                    <TableCell>${payment.amount.toLocaleString()}</TableCell>
-                    <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={payment.status} 
-                        color={getStatusColor(payment.status) as any}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Button size="small" variant="outlined">
-                        View Receipt
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {userPayments.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell>{payment.id}</TableCell>
+                  <TableCell>${payment.amount.toLocaleString()}</TableCell>
+                  <TableCell>
+                    <Chip 
+                      label={payment.status} 
+                      color={getStatusColor(payment.status) as any}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
+                  <TableCell>{payment.details.method}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
@@ -88,7 +87,7 @@ export default function Payments() {
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
           {userPolicies.map(policy => (
             <Paper key={policy.id} sx={{ p: 2 }}>
-              <Typography variant="subtitle1">{policy.type}</Typography>
+              <Typography variant="subtitle1">Policy {policy.id}</Typography>
               <Typography variant="body2" color="text.secondary">
                 Next Payment: ${(policy.premium / 12).toLocaleString()}
               </Typography>

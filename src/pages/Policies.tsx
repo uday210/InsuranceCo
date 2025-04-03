@@ -1,73 +1,56 @@
-import { Box, Typography, Paper, Button, Grid } from '@mui/material';
+import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
-import { policies } from '../data/mockData';
-import { useNavigate } from 'react-router-dom';
+import { mockPolicies } from '../data/mockData';
 
 export default function Policies() {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
-  const userPolicies = policies.filter(policy => 
-    user?.policyNumbers.includes(policy.id)
+  if (!user) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography>Please log in to view your policies</Typography>
+      </Box>
+    );
+  }
+
+  const userPolicies = mockPolicies.filter(policy => 
+    user.policies.includes(policy.id)
   );
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Your Policies</Typography>
-        <Button variant="contained" color="primary">
-          Add New Policy
-        </Button>
-      </Box>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        Your Policies
+      </Typography>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
-        {userPolicies.map(policy => (
-          <Paper key={policy.id} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>{policy.type}</Typography>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Policy Number</Typography>
-              <Typography variant="body1">{policy.id}</Typography>
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Status</Typography>
-              <Typography 
-                variant="body1" 
-                sx={{ 
-                  color: policy.status === 'Active' ? 'success.main' : 'error.main',
-                  fontWeight: 'bold'
-                }}
-              >
-                {policy.status}
-              </Typography>
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Coverage</Typography>
-              <Typography variant="body1">${policy.coverage.toLocaleString()}</Typography>
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Premium</Typography>
-              <Typography variant="body1">${policy.premium.toLocaleString()} / {policy.paymentSchedule}</Typography>
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Period</Typography>
-              <Typography variant="body1">
-                {new Date(policy.startDate).toLocaleDateString()} - {new Date(policy.endDate).toLocaleDateString()}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-              <Button variant="outlined" size="small">
-                View Details
-              </Button>
-              <Button variant="outlined" size="small">
-                Make Payment
-              </Button>
-              <Button variant="outlined" size="small" color="error">
-                Cancel Policy
-              </Button>
-            </Box>
-          </Paper>
-        ))}
-      </Box>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Policy Number</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Coverage</TableCell>
+              <TableCell>Premium</TableCell>
+              <TableCell>Start Date</TableCell>
+              <TableCell>End Date</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {userPolicies.map((policy) => (
+              <TableRow key={policy.id}>
+                <TableCell>{policy.number}</TableCell>
+                <TableCell>{policy.type}</TableCell>
+                <TableCell>{policy.status}</TableCell>
+                <TableCell>${policy.coverage.toLocaleString()}</TableCell>
+                <TableCell>${policy.premium.toLocaleString()}</TableCell>
+                <TableCell>{new Date(policy.startDate).toLocaleDateString()}</TableCell>
+                <TableCell>{new Date(policy.endDate).toLocaleDateString()}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 } 
