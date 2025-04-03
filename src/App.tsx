@@ -10,6 +10,8 @@ import Payments from './pages/Payments';
 import NewPayment from './pages/NewPayment';
 import Support from './pages/Support';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import AppBar from './components/AppBar';
+import Sidebar from './components/Sidebar';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -32,12 +34,15 @@ function AppContent() {
           element={
             <PrivateRoute>
               <Box sx={{ display: 'flex', width: '100%' }}>
+                <AppBar handleDrawerToggle={handleDrawerToggle} />
+                <Sidebar open={!mobileOpen} onClose={handleDrawerToggle} />
                 <Box
                   component="main"
                   sx={{
                     flexGrow: 1,
                     p: { xs: 2, sm: 3, md: 4 },
-                    width: '100%',
+                    width: { sm: `calc(100% - 280px)` },
+                    ml: { sm: '280px' },
                     background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
                     minHeight: '100vh',
                   }}
