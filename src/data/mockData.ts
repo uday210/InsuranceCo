@@ -1,188 +1,214 @@
-export const users = [
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  policies: string[];
+}
+
+export interface Policy {
+  id: string;
+  type: string;
+  number: string;
+  status: string;
+  coverage: number;
+  premium: number;
+  startDate: string;
+  endDate: string;
+  details: {
+    [key: string]: any;
+  };
+}
+
+export interface Claim {
+  id: string;
+  policyId: string;
+  type: string;
+  status: string;
+  amount: number;
+  dateSubmitted: string;
+  details: {
+    [key: string]: any;
+  };
+}
+
+export interface Payment {
+  id: string;
+  policyId: string;
+  amount: number;
+  date: string;
+  status: string;
+  details: {
+    [key: string]: any;
+  };
+}
+
+export const mockUsers: User[] = [
   {
-    id: 'USR-001',
-    email: 'john.doe@example.com',
-    password: 'password123', // In a real app, this would be hashed
+    id: '1',
     name: 'John Doe',
-    policyNumbers: ['POL-001', 'POL-002', 'POL-003', 'POL-004']
+    email: 'john@example.com',
+    policies: ['1', '2']
+  },
+  {
+    id: '2',
+    name: 'Jane Smith',
+    email: 'jane@example.com',
+    policies: ['3', '4']
   }
 ];
 
-export const policies = [
+export const mockPolicies: Policy[] = [
   {
-    id: 'POL-001',
-    type: 'Auto Insurance',
+    id: '1',
+    type: 'Auto',
+    number: 'AUTO-001',
     status: 'Active',
     coverage: 50000,
     premium: 1200,
-    paymentSchedule: 'monthly',
-    startDate: '2024-01-01',
-    endDate: '2024-12-31',
+    startDate: '2023-01-01',
+    endDate: '2024-01-01',
     details: {
-      vehicleMake: 'Toyota',
-      vehicleModel: 'Camry',
-      vehicleYear: '2022',
-      coverageType: 'Comprehensive'
+      vehicle: 'Toyota Camry 2020',
+      vin: '1HGCM82633A123456'
     }
   },
   {
-    id: 'POL-002',
-    type: 'Home Insurance',
+    id: '2',
+    type: 'Home',
+    number: 'HOME-001',
     status: 'Active',
-    coverage: 500000,
-    premium: 2400,
-    paymentSchedule: 'monthly',
-    startDate: '2024-01-01',
-    endDate: '2024-12-31',
+    coverage: 300000,
+    premium: 1500,
+    startDate: '2023-01-01',
+    endDate: '2024-01-01',
     details: {
-      propertyType: 'Single Family Home',
-      address: '123 Main St, Anytown, USA',
-      squareFeet: 2500,
+      address: '123 Main St',
       yearBuilt: 2010
     }
   },
   {
-    id: 'POL-003',
-    type: 'Life Insurance',
+    id: '3',
+    type: 'Life',
+    number: 'LIFE-001',
     status: 'Active',
     coverage: 1000000,
-    premium: 150,
-    paymentSchedule: 'monthly',
-    startDate: '2024-01-15',
-    endDate: '2054-01-15',
+    premium: 2000,
+    startDate: '2023-01-01',
+    endDate: '2024-01-01',
     details: {
-      policyType: 'Term Life',
-      termLength: '30 years',
-      beneficiaries: ['Jane Doe', 'Jimmy Doe']
+      beneficiary: 'Jane Smith',
+      term: '20 years'
     }
   },
   {
-    id: 'POL-004',
-    type: 'Health Insurance',
+    id: '4',
+    type: 'Health',
+    number: 'HLTH-001',
     status: 'Active',
-    coverage: 2000000,
-    premium: 450,
-    paymentSchedule: 'monthly',
-    startDate: '2024-01-01',
-    endDate: '2024-12-31',
+    coverage: 500000,
+    premium: 1800,
+    startDate: '2023-01-01',
+    endDate: '2024-01-01',
     details: {
       planType: 'PPO',
-      deductible: 1500,
-      coPayment: 25,
-      familyCoverage: true
+      deductible: 2000
     }
   }
 ];
 
-export const claims = [
+export const mockClaims: Claim[] = [
   {
-    id: 'CLM-001',
-    policyId: 'POL-001',
-    description: 'Minor car accident - front bumper damage',
-    amount: 2500,
+    id: '1',
+    policyId: '1',
+    type: 'Auto',
     status: 'Pending',
-    dateSubmitted: '2024-02-28',
-    documents: ['accident_report.pdf', 'damage_photos.jpg'],
-    details: {
-      location: '456 Oak Ave, Anytown, USA',
-      date: '2024-02-27',
-      description: 'Collision with another vehicle at intersection'
-    }
-  },
-  {
-    id: 'CLM-002',
-    policyId: 'POL-002',
-    description: 'Water damage from pipe leak',
     amount: 5000,
-    status: 'Approved',
-    dateSubmitted: '2024-02-15',
-    documents: ['plumber_report.pdf', 'damage_assessment.pdf'],
+    dateSubmitted: '2023-06-15',
     details: {
-      location: 'Master Bathroom',
-      date: '2024-02-14',
-      description: 'Burst pipe caused water damage to ceiling and walls'
+      description: 'Rear-end collision',
+      location: 'Main Street'
     }
   },
   {
-    id: 'CLM-003',
-    policyId: 'POL-004',
-    description: 'Emergency room visit',
-    amount: 3500,
-    status: 'Completed',
-    dateSubmitted: '2024-03-01',
-    documents: ['medical_report.pdf', 'hospital_bill.pdf'],
+    id: '2',
+    policyId: '2',
+    type: 'Home',
+    status: 'Approved',
+    amount: 10000,
+    dateSubmitted: '2023-05-20',
     details: {
-      hospital: 'City General Hospital',
-      date: '2024-02-29',
-      treatment: 'Broken arm treatment and cast'
+      description: 'Water damage',
+      cause: 'Pipe burst'
+    }
+  },
+  {
+    id: '3',
+    policyId: '3',
+    type: 'Life',
+    status: 'Pending',
+    amount: 1000000,
+    dateSubmitted: '2023-07-01',
+    details: {
+      description: 'Death benefit claim',
+      cause: 'Natural causes'
     }
   }
 ];
 
-export const payments = [
+export const mockPayments: Payment[] = [
   {
-    id: 'PAY-001',
-    policyId: 'POL-001',
-    amount: 100,
-    date: '2024-03-15',
+    id: '1',
+    policyId: '1',
+    amount: 1200,
+    date: '2023-07-01',
     status: 'Completed',
-    method: 'credit_card',
     details: {
-      cardType: 'Visa',
-      last4: '4242',
-      receiptNumber: 'RCP-2024-001'
+      method: 'Credit Card',
+      receipt: 'RC-001'
     }
   },
   {
-    id: 'PAY-002',
-    policyId: 'POL-002',
-    amount: 200,
-    date: '2024-03-15',
+    id: '2',
+    policyId: '2',
+    amount: 1500,
+    date: '2023-07-01',
     status: 'Completed',
-    method: 'bank_transfer',
     details: {
-      bankName: 'National Bank',
-      last4: '9876',
-      receiptNumber: 'RCP-2024-002'
+      method: 'Bank Transfer',
+      receipt: 'RC-002'
     }
   },
   {
-    id: 'PAY-003',
-    policyId: 'POL-003',
-    amount: 150,
-    date: '2024-03-15',
+    id: '3',
+    policyId: '3',
+    amount: 2000,
+    date: '2023-07-01',
     status: 'Completed',
-    method: 'credit_card',
     details: {
-      cardType: 'Mastercard',
-      last4: '1234',
-      receiptNumber: 'RCP-2024-003'
+      method: 'Credit Card',
+      receipt: 'RC-003'
     }
   },
   {
-    id: 'PAY-004',
-    policyId: 'POL-004',
-    amount: 450,
-    date: '2024-03-15',
+    id: '4',
+    policyId: '4',
+    amount: 1800,
+    date: '2023-07-01',
+    status: 'Completed',
+    details: {
+      method: 'Bank Transfer',
+      receipt: 'RC-004'
+    }
+  },
+  {
+    id: '5',
+    policyId: '1',
+    amount: 1200,
+    date: '2023-08-01',
     status: 'Pending',
-    method: 'bank_transfer',
     details: {
-      bankName: 'City Bank',
-      last4: '5432',
-      receiptNumber: 'RCP-2024-004'
-    }
-  },
-  {
-    id: 'PAY-005',
-    policyId: 'POL-001',
-    amount: 100,
-    date: '2024-02-15',
-    status: 'Completed',
-    method: 'credit_card',
-    details: {
-      cardType: 'Visa',
-      last4: '4242',
-      receiptNumber: 'RCP-2024-005'
+      method: 'Credit Card',
+      receipt: 'RC-005'
     }
   }
 ]; 
