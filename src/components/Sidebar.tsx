@@ -8,6 +8,7 @@ const navItems = [
   { path: '/policies', label: 'Policies', icon: '📋' },
   { path: '/claims', label: 'Claims', icon: '🎯' },
   { path: '/payments', label: 'Payments', icon: '💳' },
+  { path: '/premium-estimation', label: 'Premium Estimation', icon: '🧮' },
   { path: '/support', label: 'Support', icon: '💬' }
 ];
 
