@@ -8,6 +8,7 @@ import Policies from './pages/Policies';
 import Claims from './pages/Claims';
 import Payments from './pages/Payments';
 import NewPayment from './pages/NewPayment';
+import Settings from './pages/Settings';
 import Support from './pages/Support';
 import Sidebar from './components/Sidebar';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -55,6 +56,7 @@ function AppContent() {
                       <Route path="/claims" element={<Claims />} />
                       <Route path="/payments" element={<Payments />} />
                       <Route path="/payments/new" element={<NewPayment />} />
+                      <Route path="/settings" element={<Settings />} />
                       <Route path="/support" element={<Support />} />
                     </Routes>
                   </Box>
@@ -72,7 +74,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
+      <Router basename="/InsuranceCo">
         <AuthProvider>
           <AppContent />
         </AuthProvider>
