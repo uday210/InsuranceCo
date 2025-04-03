@@ -1,7 +1,8 @@
-import { Box, Typography, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, Avatar } from '@mui/material';
+import { Box, Typography, Paper, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, Avatar, Container, useTheme } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { policies, claims, payments } from '../data/mockData';
 import { useNavigate } from 'react-router-dom';
+import QuickLinks from '../components/QuickLinks';
 
 const INSURANCE_ICONS: { [key: string]: string } = {
   'Auto Insurance': '🚗',
@@ -13,6 +14,7 @@ const INSURANCE_ICONS: { [key: string]: string } = {
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const userPolicies = policies.filter(policy => 
     user?.policyNumbers.includes(policy.id)
@@ -59,240 +61,380 @@ export default function Dashboard() {
   };
 
   return (
-    <Box>
-      {/* Header */}
-      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Avatar 
+    <Container maxWidth="xl">
+      <Box sx={{ py: 4 }}>
+        {/* Header */}
+        <Box 
           sx={{ 
-            width: 64, 
-            height: 64, 
-            bgcolor: 'primary.main',
-            fontSize: '1.5rem'
+            mb: 6,
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'center', sm: 'flex-start' },
+            gap: 3,
+            textAlign: { xs: 'center', sm: 'left' }
           }}
         >
-          {user?.name.split(' ').map(n => n[0]).join('')}
-        </Avatar>
-        <Box>
-          <Typography variant="h4" gutterBottom>
-            Welcome back, {user?.name.split(' ')[0] || 'John'}!
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Here's an overview of your insurance portfolio
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* Overview Cards */}
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-        gap: 3, 
-        mb: 4 
-      }}>
-        <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)', color: 'white' }}>
-          <Typography color="rgba(255,255,255,0.8)" gutterBottom>Active Policies</Typography>
-          <Typography variant="h3">{userPolicies.length}</Typography>
-          <Typography variant="body2" sx={{ mt: 1, color: 'rgba(255,255,255,0.8)' }}>
-            Across {new Set(userPolicies.map(p => p.type)).size} categories
-          </Typography>
-        </Paper>
-
-        <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', color: 'white' }}>
-          <Typography color="rgba(255,255,255,0.8)" gutterBottom>Pending Claims</Typography>
-          <Typography variant="h3">{pendingClaims.length}</Typography>
-          <Typography variant="body2" sx={{ mt: 1, color: 'rgba(255,255,255,0.8)' }}>
-            Total amount: ${pendingClaims.reduce((sum, claim) => sum + claim.amount, 0).toLocaleString()}
-          </Typography>
-        </Paper>
-
-        <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', color: 'white' }}>
-          <Typography color="rgba(255,255,255,0.8)" gutterBottom>Next Payment</Typography>
-          <Typography variant="h3">${nextPayment.toLocaleString()}</Typography>
-          <Typography variant="body2" sx={{ mt: 1, color: 'rgba(255,255,255,0.8)' }}>
-            Due in {Math.ceil((new Date('2024-04-01').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
-          </Typography>
-        </Paper>
-
-        <Paper 
-          sx={{ 
-            p: 3, 
-            background: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)', 
-            color: 'white',
-            cursor: 'pointer',
-            transition: 'transform 0.2s',
-            '&:hover': {
-              transform: 'translateY(-4px)'
-            }
-          }}
-          onClick={() => navigate('/support')}
-        >
-          <Typography color="rgba(255,255,255,0.8)" gutterBottom>Need Help?</Typography>
-          <Typography variant="h6">Contact Support</Typography>
-          <Typography variant="body2" sx={{ mt: 1, color: 'rgba(255,255,255,0.8)' }}>
-            24/7 customer service
-          </Typography>
-        </Paper>
-      </Box>
-
-      {/* Recent Activity */}
-      <Paper sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <span role="img" aria-label="activity">📊</span> Recent Activity
-        </Typography>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Date</TableCell>
-                <TableCell>Activity</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Details</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {recentActivity.map((activity, index) => (
-                <TableRow 
-                  key={index}
-                  sx={{ 
-                    '&:hover': { 
-                      bgcolor: 'action.hover',
-                      cursor: 'pointer'
-                    }
-                  }}
-                >
-                  <TableCell>{activity.date.toLocaleDateString('en-US', { 
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}</TableCell>
-                  <TableCell>{activity.activity}</TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={activity.status} 
-                      color={getStatusColor(activity.status) as any}
-                      size="small"
-                      sx={{ 
-                        fontWeight: 500,
-                        minWidth: 80,
-                        textAlign: 'center'
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton size="small" color="primary">
-                      <span role="img" aria-label="view">👁️</span>
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-
-      {/* Payment Schedule and Quick Actions */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <span role="img" aria-label="calendar">📅</span> Payment Schedule
-          </Typography>
-          {userPolicies.map(policy => (
-            <Box 
-              key={policy.id} 
+          <Avatar 
+            sx={{ 
+              width: 80, 
+              height: 80, 
+              bgcolor: 'primary.main',
+              fontSize: '2rem',
+              boxShadow: '0 8px 16px -4px rgba(0,0,0,0.1)'
+            }}
+          >
+            {user?.name.split(' ').map(n => n[0]).join('')}
+          </Avatar>
+          <Box>
+            <Typography 
+              variant="h3" 
+              gutterBottom 
               sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                mb: 2,
-                p: 2,
-                borderRadius: 1,
-                bgcolor: 'background.default',
-                '&:hover': {
-                  bgcolor: 'action.hover'
-                }
+                fontWeight: 700,
+                background: 'linear-gradient(45deg, #2196F3, #3f51b5)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography 
-                  variant="h4" 
-                  sx={{ 
-                    width: 40, 
-                    height: 40, 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    borderRadius: 1,
-                    bgcolor: 'primary.light',
-                    color: 'primary.contrastText'
-                  }}
-                >
-                  {INSURANCE_ICONS[policy.type]}
-                </Typography>
-                <Box>
-                  <Typography>{policy.type}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Due on {new Date().toLocaleDateString('en-US', { 
-                      month: 'long',
+              Welcome back, {user?.name.split(' ')[0] || 'John'}!
+            </Typography>
+            <Typography variant="h6" color="text.secondary" sx={{ opacity: 0.8 }}>
+              Here's an overview of your insurance portfolio
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Quick Links */}
+        <Box sx={{ mb: 6 }}>
+          <QuickLinks />
+        </Box>
+
+        {/* Overview Cards */}
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            lg: 'repeat(4, 1fr)'
+          },
+          gap: 3, 
+          mb: 6
+        }}>
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 3, 
+              background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)', 
+              color: 'white',
+              borderRadius: 4,
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2), transparent 70%)',
+                pointerEvents: 'none'
+              }
+            }}
+          >
+            <Typography color="rgba(255,255,255,0.9)" gutterBottom fontSize="1.1rem">Active Policies</Typography>
+            <Typography variant="h3" sx={{ mb: 2, fontWeight: 700 }}>{userPolicies.length}</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.9)' }}>
+              Across {new Set(userPolicies.map(p => p.type)).size} categories
+            </Typography>
+          </Paper>
+
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 3, 
+              background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', 
+              color: 'white',
+              borderRadius: 4,
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2), transparent 70%)',
+                pointerEvents: 'none'
+              }
+            }}
+          >
+            <Typography color="rgba(255,255,255,0.9)" gutterBottom fontSize="1.1rem">Pending Claims</Typography>
+            <Typography variant="h3" sx={{ mb: 2, fontWeight: 700 }}>{pendingClaims.length}</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.9)' }}>
+              Total amount: ${pendingClaims.reduce((sum, claim) => sum + claim.amount, 0).toLocaleString()}
+            </Typography>
+          </Paper>
+
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 3, 
+              background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', 
+              color: 'white',
+              borderRadius: 4,
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2), transparent 70%)',
+                pointerEvents: 'none'
+              }
+            }}
+          >
+            <Typography color="rgba(255,255,255,0.9)" gutterBottom fontSize="1.1rem">Next Payment</Typography>
+            <Typography variant="h3" sx={{ mb: 2, fontWeight: 700 }}>${nextPayment.toLocaleString()}</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.9)' }}>
+              Due in {Math.ceil((new Date('2024-04-01').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
+            </Typography>
+          </Paper>
+
+          <Paper 
+            elevation={0}
+            onClick={() => navigate('/support')}
+            sx={{ 
+              p: 3, 
+              background: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)', 
+              color: 'white',
+              borderRadius: 4,
+              cursor: 'pointer',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 20px -10px rgba(156,39,176,0.4)'
+              },
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2), transparent 70%)',
+                pointerEvents: 'none'
+              }
+            }}
+          >
+            <Typography color="rgba(255,255,255,0.9)" gutterBottom fontSize="1.1rem">Need Help?</Typography>
+            <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>Contact Support</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.9)' }}>
+              24/7 customer service
+            </Typography>
+          </Paper>
+        </Box>
+
+        {/* Recent Activity */}
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 4, 
+            mb: 6, 
+            borderRadius: 4,
+            border: '1px solid',
+            borderColor: theme.palette.mode === 'light' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
+            background: theme.palette.mode === 'light' ? '#fff' : 'rgba(255,255,255,0.05)'
+          }}
+        >
+          <Typography 
+            variant="h5" 
+            gutterBottom 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1.5,
+              fontWeight: 600,
+              mb: 3
+            }}
+          >
+            <span role="img" aria-label="activity" style={{ fontSize: '1.5rem' }}>📊</span> 
+            Recent Activity
+          </Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '1rem' }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '1rem' }}>Activity</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '1rem' }}>Status</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '1rem' }}>Details</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {recentActivity.map((activity, index) => (
+                  <TableRow 
+                    key={index}
+                    sx={{ 
+                      '&:hover': { 
+                        bgcolor: 'action.hover',
+                        cursor: 'pointer'
+                      },
+                      transition: 'background-color 0.2s ease'
+                    }}
+                  >
+                    <TableCell>{activity.date.toLocaleDateString('en-US', { 
+                      month: 'short',
                       day: 'numeric',
                       year: 'numeric'
-                    })}
-                  </Typography>
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="h6" color="primary">
-                  ${(policy.premium / 12).toLocaleString()}
-                </Typography>
-                <Button 
-                  variant="contained" 
-                  size="small"
-                  onClick={() => navigate(`/payments/new?policyId=${policy.id}`)}
-                  sx={{
-                    textTransform: 'none',
-                    boxShadow: 2
-                  }}
-                >
-                  Pay Now
-                </Button>
-              </Box>
-            </Box>
-          ))}
+                    })}</TableCell>
+                    <TableCell>{activity.activity}</TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={activity.status} 
+                        color={getStatusColor(activity.status) as any}
+                        size="small"
+                        sx={{ 
+                          fontWeight: 500,
+                          minWidth: 90,
+                          textAlign: 'center',
+                          borderRadius: '6px'
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton 
+                        size="small" 
+                        sx={{ 
+                          color: 'primary.main',
+                          '&:hover': {
+                            bgcolor: 'primary.main',
+                            color: 'white'
+                          },
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <span role="img" aria-label="view">👁️</span>
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Paper>
 
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <span role="img" aria-label="actions">⚡</span> Quick Actions
+        {/* Payment Schedule */}
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 4,
+            borderRadius: 4,
+            border: '1px solid',
+            borderColor: theme.palette.mode === 'light' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
+            background: theme.palette.mode === 'light' ? '#fff' : 'rgba(255,255,255,0.05)'
+          }}
+        >
+          <Typography 
+            variant="h5" 
+            gutterBottom 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1.5,
+              fontWeight: 600,
+              mb: 3
+            }}
+          >
+            <span role="img" aria-label="calendar" style={{ fontSize: '1.5rem' }}>📅</span> 
+            Payment Schedule
           </Typography>
-          <Box sx={{ display: 'grid', gap: 2 }}>
-            {[
-              { icon: '📝', label: 'File a Claim', path: '/claims/new', color: '#2196F3' },
-              { icon: '➕', label: 'Add Policy', path: '/policies/new', color: '#4CAF50' },
-              { icon: '💬', label: 'Contact Support', path: '/support', color: '#9C27B0' },
-              { icon: '👤', label: 'Update Profile', path: '/profile', color: '#FF9800' }
-            ].map((action, index) => (
-              <Button 
-                key={index}
-                variant="outlined"
-                startIcon={<span role="img" aria-label={action.label}>{action.icon}</span>}
-                onClick={() => navigate(action.path)}
-                sx={{
-                  color: action.color,
-                  borderColor: action.color,
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {userPolicies.map(policy => (
+              <Paper
+                key={policy.id} 
+                elevation={0}
+                sx={{ 
+                  p: 3,
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  borderRadius: 3,
+                  bgcolor: theme.palette.mode === 'light' ? 'grey.50' : 'rgba(255,255,255,0.03)',
+                  transition: 'all 0.2s ease',
                   '&:hover': {
-                    borderColor: action.color,
-                    bgcolor: `${action.color}10`
-                  },
-                  textTransform: 'none',
-                  justifyContent: 'flex-start',
-                  py: 1.5
+                    bgcolor: theme.palette.mode === 'light' ? 'grey.100' : 'rgba(255,255,255,0.05)',
+                    transform: 'translateX(4px)'
+                  }
                 }}
               >
-                {action.label}
-              </Button>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <Box
+                    sx={{ 
+                      width: 48, 
+                      height: 48, 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      borderRadius: 2,
+                      fontSize: '1.5rem',
+                      background: 'linear-gradient(135deg, #3f51b5 0%, #2196F3 100%)',
+                      color: 'white',
+                      boxShadow: '0 4px 12px -2px rgba(33,150,243,0.3)'
+                    }}
+                  >
+                    {INSURANCE_ICONS[policy.type]}
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>{policy.type}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Due on {new Date().toLocaleDateString('en-US', { 
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontWeight: 600,
+                      color: 'primary.main'
+                    }}
+                  >
+                    ${(policy.premium / 12).toLocaleString()}
+                  </Typography>
+                  <Button 
+                    variant="contained"
+                    onClick={() => navigate(`/payments/new?policyId=${policy.id}`)}
+                    sx={{
+                      textTransform: 'none',
+                      borderRadius: 2,
+                      px: 3,
+                      background: 'linear-gradient(135deg, #3f51b5 0%, #2196F3 100%)',
+                      boxShadow: '0 4px 12px -2px rgba(33,150,243,0.3)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #3f51b5 0%, #2196F3 100%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 16px -2px rgba(33,150,243,0.4)'
+                      }
+                    }}
+                  >
+                    Pay Now
+                  </Button>
+                </Box>
+              </Paper>
             ))}
           </Box>
         </Paper>
       </Box>
-    </Box>
+    </Container>
   );
 } 
