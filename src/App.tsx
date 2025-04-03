@@ -9,6 +9,7 @@ import Policies from './pages/Policies';
 import Claims from './pages/Claims';
 import Payments from './pages/Payments';
 import NewPayment from './pages/NewPayment';
+import Support from './pages/Support';
 
 // Layout components
 import Sidebar from './components/Sidebar';
@@ -45,6 +46,7 @@ function AppRoutes() {
       <Route path="/claims" element={<PrivateRoute><Claims /></PrivateRoute>} />
       <Route path="/payments" element={<PrivateRoute><Payments /></PrivateRoute>} />
       <Route path="/payments/new" element={<PrivateRoute><NewPayment /></PrivateRoute>} />
+      <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />
     </Routes>
   );
 }
