@@ -12,6 +12,7 @@ import Support from './pages/Support';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AppBar from './components/AppBar';
 import Sidebar from './components/Sidebar';
+import { SalesforceChat } from './components/SalesforceChat';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
 function AppContent() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -27,6 +29,7 @@ function AppContent() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      {user && <SalesforceChat />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
